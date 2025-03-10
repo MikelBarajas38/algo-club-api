@@ -33,6 +33,7 @@ class CommandTests(SimpleTestCase):
         """
         Test waiting for db when getting errors.
         """
+
         patched_check.side_effect = [PsycopgError] * 3 + \
                                     [OperationalError] * 3 + [True]
 
