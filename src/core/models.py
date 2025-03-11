@@ -19,7 +19,6 @@ class UserManager(BaseUserManager):
         """
         Create, save and return a new user.
         """
-
         if not email:
             raise ValueError('Email is required.')
 
@@ -33,7 +32,6 @@ class UserManager(BaseUserManager):
         """
         Create, save and return a new superuser.
         """
-
         user = self.create_user(email, password)
         user.is_superuser = True
         user.is_staff = True
@@ -46,7 +44,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     """
     Custom user model.
     """
-
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
