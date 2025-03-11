@@ -70,3 +70,32 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'  # Default field for authentication
+
+
+class Contest(models.Model):
+    """
+    Contest model.
+    """
+    id = models.CharField(max_length=20, primary_key=True)
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    url = models.URLField()
+
+    PLATFORMS = {
+        'C': 'Codeforces',
+        'O': 'OmegaUp',
+        'K': 'Kattis',
+        'V': 'Vjudge'
+    }
+
+    platform = models.CharField(
+        max_length=1,
+        choices=PLATFORMS
+    )
+
+    start_time = models.DateTimeField(auto_now=True, null=True)
+    end_time = models.DateTimeField(auto_now=True, null=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name

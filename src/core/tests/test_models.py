@@ -5,6 +5,8 @@ Tests for models.
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
+from core import models
+
 
 class ModelTests(TestCase):
     """
@@ -65,3 +67,18 @@ class ModelTests(TestCase):
 
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+
+    def test_create_contest(self):
+        """
+        Test creating a new contest
+        """
+
+        contest = models.Contest.objects.create(
+            id=1,
+            name='Test Contest',
+            description='Test Description',
+            url='https://example.com',
+            platform='C',
+        )
+
+        self.assertEqual(str(contest), contest.name)
