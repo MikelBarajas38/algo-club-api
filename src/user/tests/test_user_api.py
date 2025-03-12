@@ -9,10 +9,13 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
+from user.serializers import UserSerializer
+
 
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
 ME_URL = reverse('user:me')
+LIST_URL = reverse('user:list')
 
 
 def create_user(**params):
@@ -43,7 +46,9 @@ class PublicUserApiTests(TestCase):
         res = self.client.post(CREATE_USER_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
         user = get_user_model().objects.get(email=payload['email'])
+
         self.assertTrue(user.check_password(payload['password']))
         self.assertNotIn('password', res.data)
 
@@ -58,6 +63,7 @@ class PublicUserApiTests(TestCase):
         }
 
         create_user(**payload)
+
         res = self.client.post(CREATE_USER_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -75,7 +81,9 @@ class PublicUserApiTests(TestCase):
         res = self.client.post(CREATE_USER_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
         user = get_user_model().objects.filter(email=payload['email'])
+
         self.assertFalse(user.exists())
 
     def test_create_token_for_user(self):
@@ -97,8 +105,8 @@ class PublicUserApiTests(TestCase):
 
         res = self.client.post(TOKEN_URL, payload)
 
-        self.assertIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('token', res.data)
 
     def test_create_token_invalid_credentials(self):
         """
@@ -144,6 +152,31 @@ class PublicUserApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_list_all_users(self):
+        """
+        Test retrieving list of registered users
+        """
+
+        create_user(**{
+            'email': 'test@example.com',
+            'password': 'password1234',
+            'name': 'Test Name 1'
+        })
+
+        create_user(**{
+            'email': 'test2@example.com',
+            'password': 'password1234',
+            'name': 'Test Name 2'
+        })
+
+        users = get_user_model().objects.all()
+        serializer = UserSerializer(users, many=True)
+
+        res = self.client.get(LIST_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
+
 
 class PrivateUserApiTests(TestCase):
     """
@@ -157,7 +190,10 @@ class PrivateUserApiTests(TestCase):
         payload = {
             'email': 'test@example.com',
             'password': 'testpass1234',
-            'name': 'Test Name'
+            'name': 'Test Name',
+            'codeforces_handle': 'test_cf_handle',
+            'omegaup_handle': 'test_omegaup_handle',
+            'kattis_handle': 'test_kattis_handle',
         }
 
         self.user = create_user(**payload)
@@ -171,8 +207,11 @@ class PrivateUserApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, {
+            'email': self.user.email,
             'name': self.user.name,
-            'email': self.user.email
+            'codeforces_handle': self.user.codeforces_handle,
+            'omegaup_handle': self.user.omegaup_handle,
+            'kattis_handle': self.user.kattis_handle,
         })
 
     def test_post_me_not_allowed(self):
@@ -189,12 +228,16 @@ class PrivateUserApiTests(TestCase):
         """
         payload = {
             'name': 'New Name',
-            'password': 'newpass1234'
+            'password': 'newpass1234',
+            'codeforces_handle': 'new_cf_handle',
+            'omegaup_handle': 'new_omegaup_handle',
+            'kattis_handle': 'new_kattis_handle',
         }
 
         res = self.client.patch(ME_URL, payload)
 
         self.user.refresh_from_db()
+
         self.assertEqual(self.user.name, payload['name'])
         self.assertTrue(self.user.check_password(payload['password']))
         self.assertEqual(res.status_code, status.HTTP_200_OK)

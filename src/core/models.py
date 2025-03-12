@@ -50,20 +50,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     codeforces_handle = models.CharField(
         max_length=255,
-        blank=True,
         null=True,
+        blank=True,
         unique=True
     )
     omegaup_handle = models.CharField(
         max_length=255,
-        blank=True,
         null=True,
+        blank=True,
         unique=True
     )
     kattis_handle = models.CharField(
         max_length=255,
-        blank=True,
         null=True,
+        blank=True,
         unique=True
     )
 
@@ -76,7 +76,7 @@ class Contest(models.Model):
     """
     Contest model.
     """
-    id = models.CharField(max_length=20, primary_key=True)
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     url = models.URLField()
@@ -93,9 +93,24 @@ class Contest(models.Model):
         choices=PLATFORMS
     )
 
-    start_time = models.DateTimeField(auto_now=True, null=True)
-    end_time = models.DateTimeField(auto_now=True, null=True)
-    last_updated = models.DateTimeField(auto_now=True)
+    platform_id = models.CharField(max_length=10)
+
+    start_time = models.DateTimeField(
+        auto_now=True,
+        null=True,
+        blank=True
+    )
+
+    end_time = models.DateTimeField(
+        auto_now=True,
+        null=True,
+        blank=True
+    )
+
+    last_updated = models.DateTimeField(
+        auto_now=True,
+        blank=True
+    )
 
     def __str__(self):
         return self.name

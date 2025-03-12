@@ -38,4 +38,5 @@ urlpatterns = [
         name='api-redoc'
     ),
     path('api/user/', include('user.urls')),
+    path('api/contest/', include('contest.urls')),
 ]

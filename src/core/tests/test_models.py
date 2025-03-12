@@ -74,11 +74,13 @@ class ModelTests(TestCase):
         """
 
         contest = models.Contest.objects.create(
-            id=1,
             name='Test Contest',
             description='Test Description',
             url='https://example.com',
             platform='C',
+            platform_id='1'
         )
 
         self.assertEqual(str(contest), contest.name)
+        self.assertEqual(contest.platform, 'C')
+        self.assertEqual(contest.platform_id, '1')
